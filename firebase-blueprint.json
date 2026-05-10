@@ -1,0 +1,173 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "A user of the application.",
+      "type": "object",
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "description": "The user's email address."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp when the user was created."
+        }
+      },
+      "required": ["email", "createdAt"]
+    },
+    "Project": {
+      "title": "Project",
+      "description": "A project containing notes.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The project ID."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns the project."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the project."
+        },
+        "rootNoteId": {
+          "type": "string",
+          "description": "The ID of the root note for this project."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp when the project was created."
+        },
+        "categoryId": {
+          "type": "string",
+          "description": "Optional ID of the category this project belongs to."
+        },
+        "creatorId": {
+          "type": "string",
+          "description": "The ID of the user who created the project."
+        },
+        "creatorEmail": {
+          "type": "string",
+          "description": "The email of the user who created the project."
+        },
+        "collaborators": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "List of user IDs who are collaborators on this project."
+        }
+      },
+      "required": ["id", "userId", "title", "rootNoteId", "createdAt", "creatorId"]
+    },
+    "Note": {
+      "title": "Note",
+      "description": "A note within a project.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The note ID."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns the note."
+        },
+        "projectId": {
+          "type": "string",
+          "description": "The ID of the project this note belongs to."
+        },
+        "parentId": {
+          "type": ["string", "null"],
+          "description": "The ID of the parent note, or null if it's the root note."
+        },
+        "title": {
+          "type": "string",
+          "description": "The title of the note."
+        },
+        "content": {
+          "type": "string",
+          "description": "The content of the note (Markdown or Image URL)."
+        },
+        "type": {
+          "type": "string",
+          "enum": ["ROOT", "TEXT", "CODE", "IMAGE"],
+          "description": "The type of the note."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["IDLE", "PLANNING", "GENERATING", "COMPLETED", "ERROR"],
+          "description": "The generation status of the note."
+        },
+        "children": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of child notes."
+        },
+        "timestamp": {
+          "type": "number",
+          "description": "Timestamp when the note was created or last updated."
+        },
+        "attachments": {
+          "type": "string",
+          "description": "JSON stringified array of attachments."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags associated with the note."
+        },
+        "linkedNoteIds": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "IDs of linked notes."
+        }
+      },
+      "required": ["id", "userId", "projectId", "title", "content", "type", "status", "children", "timestamp"]
+    },
+    "Category": {
+      "title": "Category",
+      "description": "A category for organizing projects.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The category ID."
+        },
+        "userId": {
+          "type": "string",
+          "description": "The ID of the user who owns the category."
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the category."
+        },
+        "color": {
+          "type": "string",
+          "description": "The color associated with the category."
+        }
+      },
+      "required": ["id", "userId", "name", "color"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": { "$ref": "#/entities/User" },
+      "description": "User profiles."
+    },
+    "/projects/{projectId}": {
+      "schema": { "$ref": "#/entities/Project" },
+      "description": "Projects created by users."
+    },
+    "/notes/{noteId}": {
+      "schema": { "$ref": "#/entities/Note" },
+      "description": "Notes created by users."
+    },
+    "/categories/{categoryId}": {
+      "schema": { "$ref": "#/entities/Category" },
+      "description": "Categories created by users."
+    }
+  }
+}

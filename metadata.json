@@ -1,0 +1,5 @@
+{
+  "name": "MindSpark",
+  "description": "AI-powered smart notebook that transforms your ideas into structured step-by-step guides.",
+  "requestFramePermissions": ["microphone"]
+}

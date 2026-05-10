@@ -1,0 +1,89 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // Helper for checking project collaboration
+    function isProjectCollaborator(projectId) {
+      let project = get(/databases/$(database)/documents/projects/$(projectId)).data;
+      return isOwner(project.creatorId) || (isSignedIn() && ('collaborators' in project) && (project.collaborators is list) && (request.auth.uid in project.collaborators));
+    }
+
+    // --- Users ---
+    match /users/{userId} {
+      // Allow reading user profiles if signed in (needed for collaborator lookup and sharing)
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId);
+      allow update: if isOwner(userId) && (!('email' in incoming()) || incoming().email == existing().email);
+    }
+
+    // --- Projects ---
+    match /projects/{projectId} {
+      function canReadProject() {
+        return isOwner(resource.data.creatorId) || (request.auth.uid in resource.data.collaborators);
+      }
+
+      function canUpdateProject() {
+        // Owners can update everything. Collaborators can mostly update nothing except status/etc if we had any.
+        // For now, let's allow collaborators to update if they are in the list.
+        return isOwner(resource.data.creatorId) || (request.auth.uid in resource.data.collaborators);
+      }
+
+      allow read: if canReadProject();
+      allow create: if isSignedIn() && incoming().creatorId == request.auth.uid;
+      allow update: if canUpdateProject();
+      allow delete: if isOwner(resource.data.creatorId);
+    }
+
+    // --- Notes ---
+    match /notes/{noteId} {
+      function canReadNote() {
+        return isOwner(resource.data.userId) || isProjectCollaborator(resource.data.projectId);
+      }
+
+      function canWriteNote() {
+        let projectId = request.method == 'create' ? incoming().projectId : existing().projectId;
+        return isOwner(request.auth.uid) || isProjectCollaborator(projectId);
+      }
+
+      allow read: if canReadNote();
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid && isProjectCollaborator(incoming().projectId);
+      allow update: if isSignedIn() && isProjectCollaborator(existing().projectId);
+      allow delete: if isSignedIn() && (isOwner(resource.data.userId) || isProjectCollaborator(resource.data.projectId));
+    }
+
+    // --- Categories ---
+    match /categories/{categoryId} {
+      allow read: if isOwner(resource.data.userId);
+      allow create: if isSignedIn() && incoming().userId == request.auth.uid;
+      allow update: if isOwner(resource.data.userId);
+      allow delete: if isOwner(resource.data.userId);
+    }
+  }
+}
