@@ -4,10 +4,10 @@ import { ProjectPlan, NoteType, StyleMemory } from "../types";
 const getAI = () => {
     const userKey = localStorage.getItem('user_gemini_api_key');
     const apiKey = userKey || process.env.GEMINI_API_KEY;
-    if (!apiKey) {
-        console.warn("Gemini API Key is missing. Please set it in Settings.");
+    if (!apiKey || apiKey === 'dummy-key') {
+        throw new Error("API_KEY_MISSING");
     }
-    return new GoogleGenAI({ apiKey: apiKey || 'dummy-key' });
+    return new GoogleGenAI({ apiKey: apiKey });
 };
 
 // Helper to compress base64 images to avoid Firestore 1MB limit
@@ -104,7 +104,7 @@ const isQuotaError = (error: any): boolean => {
 export const boostPrompt = async (prompt: string): Promise<string> => {
   try {
     const response = await getAI().models.generateContent({
-      model: 'gemini-3-flash-preview',
+      model: 'gemini-1.5-flash',
       contents: `Rewrite and enrich the following text to be a perfect command (prompt) or a great project idea to be given to an AI assistant.
 - If it's a short and simple idea, detail it and add depth.
 - If it's complex and messy, structure and clarify it.
@@ -155,7 +155,7 @@ export const createProjectPlan = async (userPrompt: string, memories: StyleMemor
       : "";
 
     const response = await getAI().models.generateContent({
-      model: 'gemini-3.1-pro-preview',
+      model: 'gemini-1.5-pro',
       contents: userPrompt + memoryContext,
       config: {
         systemInstruction: PLANNER_SYSTEM_INSTRUCTION,
@@ -246,7 +246,7 @@ Use Markdown format.
       return "--- Image could not be generated ---\n" + stepDescription;
     } else if (stepType === NoteType.TEXT) {
       const textPromise = getAI().models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-1.5-flash',
         contents: contextPrompt,
       }).catch(e => {
           console.error("Text content generation error:", e);
@@ -296,7 +296,7 @@ Use Markdown format.
       // Code generation
       try {
           const response = await getAI().models.generateContent({
-            model: 'gemini-3-flash-preview',
+            model: 'gemini-1.5-flash',
             contents: contextPrompt,
           });
           return response.text || "Content could not be generated.";
@@ -333,7 +333,7 @@ export const chatWithStep = async (
     ];
 
     const response = await getAI().models.generateContent({
-        model: 'gemini-3-flash-preview',
+        model: 'gemini-1.5-flash',
         contents: contents,
         config: {
             systemInstruction: `You are an expert in the "MindSpark" project. 

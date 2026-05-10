@@ -622,9 +622,9 @@ const App: React.FC = () => {
       // 4. Trigger Content Generation for Children sequentially
       await generateChildrenContent(plan.title, plan.steps, childIds, newNotes);
 
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      setAlertMessage("An error occurred while creating the plan. Please try again.");
+      setAlertMessage(`Plan Error: ${error?.message || JSON.stringify(error)}`);
       setIsPlanning(false);
     }
   };
@@ -1845,6 +1845,57 @@ const App: React.FC = () => {
   return (
     <div className="flex h-screen bg-[#0B0F19] text-slate-100 overflow-hidden font-sans selection:bg-indigo-500/30">
       
+      {/* API Key Gateway Modal */}
+      {!userGeminiKey && (
+        <div className="fixed inset-0 bg-[#0B0F19] z-[100] flex flex-col items-center justify-center p-4">
+          <div className="max-w-md w-full bg-slate-800 border border-indigo-500/30 rounded-2xl p-8 shadow-2xl shadow-indigo-500/10 text-center">
+            <div className="w-16 h-16 bg-indigo-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+              <Key className="w-8 h-8 text-indigo-400" />
+            </div>
+            <h2 className="text-2xl font-black text-white mb-2 tracking-tight">Welcome to MindSpark</h2>
+            <p className="text-slate-400 text-sm mb-6 leading-relaxed">
+              To use this AI Workspace, you need your own Google Gemini API Key. 
+              Your key is stored securely in your browser's local storage and is never sent to our servers.
+            </p>
+            <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="text-indigo-400 hover:text-indigo-300 text-sm font-medium mb-6 inline-block transition-colors">
+              Get your free API key here &rarr;
+            </a>
+            <div className="space-y-4 text-left">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Gemini API Key</label>
+              <input 
+                type="password" 
+                id="gateway-api-key"
+                placeholder="AIzaSy..."
+                className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-indigo-500 outline-none transition-all"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    const val = e.currentTarget.value.trim();
+                    if (val) {
+                      localStorage.setItem('user_gemini_api_key', val);
+                      setUserGeminiKey(val);
+                      window.location.reload();
+                    }
+                  }
+                }}
+              />
+              <button 
+                onClick={() => {
+                  const val = (document.getElementById('gateway-api-key') as HTMLInputElement).value.trim();
+                  if (val) {
+                    localStorage.setItem('user_gemini_api_key', val);
+                    setUserGeminiKey(val);
+                    window.location.reload();
+                  }
+                }}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-3 rounded-xl transition-all shadow-lg shadow-indigo-600/20"
+              >
+                Save & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Mobile Sidebar Overlay */}
       {isMobileMenuOpen && (
         <div 

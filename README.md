@@ -1,3 +1,13 @@
+---
+title: MindSpark
+emoji: 🧠
+colorFrom: blue
+colorTo: purple
+sdk: docker
+pinned: false
+app_port: 7860
+---
+
 # 🧠 MindSpark (AI Notebook)
 
 **MindSpark** is a next-generation AI-powered note-taking and project management platform that transforms your complex ideas into structured, actionable, and detailed project plans.
@@ -64,12 +74,11 @@ Download your massive project file as a highly readable **PDF** document or a de
 ---
 
 ## ⚖️ License
-This project is licensed under the **Polyform Non-Commercial License 1.0.0**. 
+This project is licensed under the **MIT License**. 
 
 **What does this mean?**
-- You can use and modify this project for **personal, non-commercial use**.
-- You **cannot** use this project or its code for commercial purposes, profit, or business activities without explicit permission from the owner.
-- Ownership and copyright belong to the original author.
+- You can use, modify, and distribute this project freely.
+- The original copyright notice and permission notice must be included in all copies or substantial portions of the software.
 
 ---
 
