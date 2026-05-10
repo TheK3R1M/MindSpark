@@ -155,7 +155,7 @@ export const createProjectPlan = async (userPrompt: string, memories: StyleMemor
       : "";
 
     const response = await getAI().models.generateContent({
-      model: 'gemini-1.5-pro',
+      model: 'gemini-2.5-flash',
       contents: userPrompt + memoryContext,
       config: {
         systemInstruction: PLANNER_SYSTEM_INSTRUCTION,
@@ -246,7 +246,7 @@ Use Markdown format.
       return "--- Image could not be generated ---\n" + stepDescription;
     } else if (stepType === NoteType.TEXT) {
       const textPromise = getAI().models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         contents: contextPrompt,
       }).catch(e => {
           console.error("Text content generation error:", e);
@@ -296,7 +296,7 @@ Use Markdown format.
       // Code generation
       try {
           const response = await getAI().models.generateContent({
-            model: 'gemini-1.5-flash',
+            model: 'gemini-2.5-flash',
             contents: contextPrompt,
           });
           return response.text || "Content could not be generated.";
@@ -333,7 +333,7 @@ export const chatWithStep = async (
     ];
 
     const response = await getAI().models.generateContent({
-        model: 'gemini-1.5-flash',
+        model: 'gemini-2.5-flash',
         contents: contents,
         config: {
             systemInstruction: `You are an expert in the "MindSpark" project. 
